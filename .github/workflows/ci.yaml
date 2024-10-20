@@ -37,13 +37,15 @@ jobs:
       # Step 6: Wait for the Go application to be ready
       - name: Wait for Server
         run: |
-          # Wait for port 8080 to be available using netcat
-          sudo apt-get install -y netcat
-          while ! nc -zv localhost 8080; do
-            echo "Waiting for the server to start on port 8080..."
-            sleep 1
+          # Wait for port 8080 to be available using curl
+          for i in {1..30}; do
+            if curl --fail http://localhost:8080; then
+              echo "Server is up!"
+              break
+            fi
+            echo "Waiting for the server to start..."
+            sleep 2
           done
-          echo "Server is up!"
 
       # Step 7: Run integration tests
       - name: Run Integration Tests
