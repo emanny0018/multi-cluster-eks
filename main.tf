@@ -1,4 +1,4 @@
-# Backend configuration to store state in S3 and lock state in DynamoDB
+# Backend configurattion to store state in S3 and lock state in DynamoDB
 terraform {
   backend "s3" {
     bucket         = "etl-pipeline-manny"              # Your S3 bucket for storing state
