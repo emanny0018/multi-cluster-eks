@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "etl-pipeline-manny"     # Replace with your actual S3 bucket
+    bucket         = "etl-pipeline-manny"     # Repplace with your actual S3 bucket
     key            = "dev/terraform.tfstate"  # Workspace-specific state file
     region         = "us-east-2"                       # The region where your S3 bucket is located
     dynamodb_table = "tf_state_lock"                 # DynamoDB table for state locking
