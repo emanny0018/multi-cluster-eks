@@ -28,19 +28,18 @@ jobs:
       # Step 4: Run unit tests
       - name: Run Unit Tests
         run: go test -v ./...
-      
-      
+
       # Step 5: Start the Go application in the background
       - name: Start Go Application
         run: |
-          go run main.go &
-          sleep 5  # Allow some time for the server to start
+          nohup go run main.go &  # Use nohup to properly run the app in the background
+          sleep 10  # Wait for the server to start (increase wait time if necessary)
 
-      # Step 5: Run integration tests
+      # Step 6: Run integration tests
       - name: Run Integration Tests
-        run: go run main.go & go test -v integration_test.go
+        run: go test -v integration_test.go
 
-      # Step 6: SonarCloud Scan
+      # Step 7: SonarCloud Scan
       - name: SonarCloud Scan
         run: |
           sonar-scanner \
