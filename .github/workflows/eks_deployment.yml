@@ -33,13 +33,18 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.5.5  # You can update to the latest version
+          terraform_version: 1.5.5  # Specify Terraform version
 
-      # Step 4: Initialize Terraform (with the S3 backend and DynamoDB locking)
+      # Step 4: Initialize Terraform with Workspace-Specific State
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=your-terraform-state-bucket" \
+            -backend-config="key=${{ env.TF_WORKSPACE }}/terraform.tfstate" \
+            -backend-config="region=us-east-2" \
+            -backend-config="dynamodb_table=terraform-locks"
 
-      # Step 5: Select or create the Terraform workspace
+      # Step 5: Select or Create Terraform Workspace
       - name: Select/Create Workspace
         run: |
           terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
