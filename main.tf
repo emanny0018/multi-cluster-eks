@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "your-terraform-state-bucket"
+    bucket         = "etl-pipeline-manny"
     key            = "${terraform.workspace}/terraform.tfstate"  # Workspace-specific state file
     region         = "us-east-2"
     dynamodb_table = "terraform-locks"
