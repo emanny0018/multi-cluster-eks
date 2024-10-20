@@ -1,0 +1,72 @@
+name: CI Pipeline with SonarCloud
+
+on:
+  push:
+    branches:
+      - test  # Adjust this to your desired branch
+
+jobs:
+  build_and_test:
+    name: Build, Test, and Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.19  # Specify the Go version you need
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: go mod tidy
+
+      # Step 4: Run unit tests
+      - name: Run Unit Tests
+        run: go test -v ./...
+
+      # Step 5: Run integration tests
+      - name: Run Integration Tests
+        run: go run main.go & go test -v integration_test.go
+
+      # Step 6: SonarCloud Scan
+      - name: SonarCloud Scan
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=emanny0018_multi-cluster-eks \
+            -Dsonar.organization=emanny0018 \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+  docker:
+    name: Build and Push Docker Image
+    needs: build_and_test  # This ensures the Docker job only runs after the tests and Sonar scan succeed
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 3: Build the Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ericmanny:test -f Dockerfile .
+
+      # Step 4: Push the Docker image to Docker Hub
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/ericmanny:test
+
