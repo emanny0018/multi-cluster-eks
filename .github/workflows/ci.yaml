@@ -28,6 +28,13 @@ jobs:
       # Step 4: Run unit tests
       - name: Run Unit Tests
         run: go test -v ./...
+      
+      
+      # Step 5: Start the Go application in the background
+      - name: Start Go Application
+        run: |
+          go run main.go &
+          sleep 5  # Allow some time for the server to start
 
       # Step 5: Run integration tests
       - name: Run Integration Tests
