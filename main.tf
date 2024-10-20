@@ -1,7 +1,15 @@
-# main.tf
+terraform {
+  backend "s3" {
+    bucket         = "etl-pipeline-manny"     # Replace with your actual S3 bucket
+    key            = "${terraform.workspace}/terraform.tfstate"  # Workspace-specific state file
+    region         = "us-east-2"                       # The region where your S3 bucket is located
+    dynamodb_table = "tf_state_lock"                 # DynamoDB table for state locking
+    encrypt        = true                              # Ensure the state is encrypted at rest
+  }
+}
 
 provider "aws" {
-  region = "us-east-1"   # This is the AWS region where resources will be created
+  region = "us-east-1"   # AWS region where resources will be created
 }
 
 # Create the shared VPC (used by both blue and green EKS clusters)
@@ -15,6 +23,10 @@ module "vpc" {
 
   # Private subnets (split between blue and green clusters)
   private_subnets = ["10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+
+  # Output values for blue and green subnets (can be defined in the VPC module)
+  blue_private_subnets  = ["10.0.3.0/24", "10.0.4.0/24"]   # Subnets for Blue Cluster
+  green_private_subnets = ["10.0.5.0/24", "10.0.6.0/24"]   # Subnets for Green Cluster
 }
 
 # Create the Blue EKS Cluster (using its dedicated private subnets)

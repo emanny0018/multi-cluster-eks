@@ -14,33 +14,41 @@ jobs:
       id-token: write  # Required for OIDC
       contents: read   # Read permission for the repo
 
+    env:
+      TF_WORKSPACE: dev  # Set the workspace (can be dev, staging, prod, etc.)
+
     steps:
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Configure AWS to assume an IAM role with OIDC
-      - name: Assume Role with OIDC
+      # Step 2: Configure AWS Credentials using OIDC
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::051826738669:role/custom_OIDC
-          aws-region: us-east-1  # Adjust to your region
+          aws-region: us-east-1  # AWS region for the resources
 
       # Step 3: Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.0.0
+          terraform_version: 1.5.5  # You can update to the latest version
 
-      # Step 4: Terraform Init
+      # Step 4: Initialize Terraform (with the S3 backend and DynamoDB locking)
       - name: Terraform Init
         run: terraform init
 
-      # Step 5: Terraform Plan
+      # Step 5: Select or create the Terraform workspace
+      - name: Select/Create Workspace
+        run: |
+          terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
+
+      # Step 6: Terraform Plan (generate the execution plan)
       - name: Terraform Plan
         run: terraform plan
 
-      # Step 6: Terraform Apply
+      # Step 7: Terraform Apply (deploy the infrastructure)
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
