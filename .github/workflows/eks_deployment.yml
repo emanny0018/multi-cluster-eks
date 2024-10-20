@@ -39,21 +39,16 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=etl-pipeline-manny" \
+            -backend-config="bucket=your-terraform-state-bucket" \
             -backend-config="key=${{ env.TF_WORKSPACE }}/terraform.tfstate" \
             -backend-config="region=us-east-2" \
             -backend-config="dynamodb_table=terraform-locks"
 
-      # Step 5: Select or Create Terraform Workspace
-      - name: Select/Create Workspace
-        run: |
-          terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
-
-      # Step 6: Terraform Plan (generate the execution plan)
+      # Step 5: Terraform Plan (generate the execution plan)
       - name: Terraform Plan
         run: terraform plan
 
-      # Step 7: Terraform Apply (deploy the infrastructure)
+      # Step 6: Terraform Apply (deploy the infrastructure)
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
